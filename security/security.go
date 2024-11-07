@@ -1,4 +1,4 @@
-package client
+package security
 
 import (
 	"crypto/rand"
@@ -15,7 +15,7 @@ func GenerateKey(size int) (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
-// Encrypt The message must be no longer than the length of the public modulus minus twice the hash length, minus a further 2.
+// Encrypt Encrypts message using OAEP with SHA-256
 func Encrypt(message []byte, publicKey *rsa.PublicKey) ([]byte, error) {
 	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, publicKey, message, nil)
 	if err != nil {
@@ -23,6 +23,10 @@ func Encrypt(message []byte, publicKey *rsa.PublicKey) ([]byte, error) {
 	}
 
 	return ciphertext, nil
+}
+
+func MaxEncryptBitLen(publicKey *rsa.PublicKey) int {
+	return publicKey.N.BitLen() - 2*256 - 2
 }
 
 func Decrypt(message []byte, privateKey *rsa.PrivateKey) ([]byte, error) {
