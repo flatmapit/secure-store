@@ -2,13 +2,15 @@ package security
 
 import (
 	"crypto/rsa"
-	"log"
+	"errors"
 	"math/rand"
 	"testing"
 	"time"
 )
 
 const rsaLen = 4096
+const alphaCharset = "abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const byteSize = 8
 
 func FuzzEncryptDecrypt(f *testing.F) {
 	testcases := []string{"Test plaintext.", "Test case", "", "encrypt this"}
@@ -19,11 +21,7 @@ func FuzzEncryptDecrypt(f *testing.F) {
 	f.Fuzz(encryptDecrypt)
 }
 
-func TestLongPlainText(t *testing.T) {
-	const RsaLen = 4096
-	charset := "abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	plainText := []byte(stringWithCharset(447, charset))
-
+func TestMessageTooLongError(t *testing.T) {
 	privateKey, err := GenerateKey(rsaLen)
 	if err != nil {
 		t.Error(err)
@@ -31,11 +29,11 @@ func TestLongPlainText(t *testing.T) {
 
 	publicKey := &privateKey.PublicKey
 
-	maxLen := (publicKey.N.BitLen() - 2*256 - 2) / 8
-	log.Println(maxLen)
-	log.Println(len(plainText))
+	maxLen := MaxEncryptBitLen(publicKey) / byteSize
+	plainText := []byte(stringWithCharset(maxLen, alphaCharset))
+
 	_, err = Encrypt(plainText, publicKey)
-	if err != rsa.ErrMessageTooLong {
+	if !errors.Is(err, rsa.ErrMessageTooLong) {
 		t.Errorf("Expected error: %s. Error: %s.", rsa.ErrMessageTooLong, err)
 	}
 }
