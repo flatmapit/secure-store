@@ -2,8 +2,10 @@
 1. Go v1.23.2
 
 # Getting Started
-1. Run `go mod download`
-2. Run `go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest`
+1. Install dependencies: `go mod download`
+2. Install `sqlc`: `go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest`
+3. Generate `sqlc` classes: `sqlc generate`
+4. Start the server: `go run main.go`
 
 # Database Structure
 ```mermaid
