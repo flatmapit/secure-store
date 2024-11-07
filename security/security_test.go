@@ -1,4 +1,4 @@
-package client
+package security
 
 import (
 	"crypto/rsa"
@@ -22,7 +22,7 @@ func FuzzEncryptDecrypt(f *testing.F) {
 func TestLongPlainText(t *testing.T) {
 	const RsaLen = 4096
 	charset := "abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	plainText := []byte(stringWithCharset(1000, charset))
+	plainText := []byte(stringWithCharset(447, charset))
 
 	privateKey, err := GenerateKey(rsaLen)
 	if err != nil {
@@ -31,8 +31,9 @@ func TestLongPlainText(t *testing.T) {
 
 	publicKey := &privateKey.PublicKey
 
-	maxLen := publicKey.N.BitLen() - 2*256 - 2
+	maxLen := (publicKey.N.BitLen() - 2*256 - 2) / 8
 	log.Println(maxLen)
+	log.Println(len(plainText))
 	_, err = Encrypt(plainText, publicKey)
 	if err != rsa.ErrMessageTooLong {
 		t.Errorf("Expected error: %s. Error: %s.", rsa.ErrMessageTooLong, err)
