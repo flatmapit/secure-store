@@ -1,0 +1,27 @@
+version: '3'
+services:
+
+  db:
+    image: postgres:14-alpine3.15
+    volumes:
+      - "./volumes/pgsqldata:/var/lib/postgresql/data"
+    command: postgres -c stats_temp_directory=/tmp
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: postgres
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: 0.50
+          memory: 4096M
+        reservations:
+          cpus: 0.25
+          memory: 1024M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
